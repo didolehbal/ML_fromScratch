@@ -1,10 +1,17 @@
+import math
+
+
 class Perceptron:
-    def __init__(self, xb, initWeights):
+    def __init__(self, xb, initWeights, isLogistic=False):
         assert len(xb) == 2
         assert len(initWeights) > 0
         self.xb = xb[0]
         self.weights = initWeights
         self.weights.append(xb[1])
+        if(isLogistic):
+            self.activation = self.Logistic
+        else:
+            self.activation = self.Threshold
 
     def toString(self):
         return "weights= "+str(self.weights)
@@ -18,6 +25,9 @@ class Perceptron:
         else:
             return 0
 
+    def Logistic(self, x):
+        return 1/(1 + math.exp(-x))
+
     def scalar(self, x, w):
         assert len(x) == len(w)
         res = 0
@@ -30,11 +40,11 @@ class Perceptron:
         input = x.copy()
         input.append(self.xb)
         res = self.scalar(input, self.weights)
-        output = self.Threshold(res)
+        output = self.activation(res)
         return output
 
 
-def train_perceptron(p):
+def train_perceptron(p, maxSteps=100):
     alpha = 0.1
     training_data = [
         {"input": [2, 0], "output":1},
@@ -45,9 +55,8 @@ def train_perceptron(p):
 
     errors = True
     counter = 0
-    maxIterations = 100
 
-    while errors and counter < maxIterations:
+    while errors and counter < maxSteps:
         errors = False
         counter += 1
         for data in training_data:
@@ -62,7 +71,7 @@ def train_perceptron(p):
 
 
 # calls
-p = Perceptron([1, 0.5], [0, 0])
-train_perceptron(p)
+p = Perceptron([1, 0.5], [0, 0], True)
+train_perceptron(p, 3)
 print(p.toString())
-print(p.hw([2, 0]))
+print(1 if p.hw([3, 0]) >= 0.5 else 0)
